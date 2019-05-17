@@ -8,16 +8,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by zhubo on 2019/5/17.
@@ -30,13 +28,18 @@ public class DemoFragment extends Fragment {
 
     SmartRefreshLayout refreshLayout;
 
-    public static DemoFragment newInstance(int type) {
+    static Map<Integer, Fragment> map = new HashMap<>();
 
-        Bundle args = new Bundle();
-        args.putInt("type", type);
-        DemoFragment fragment = new DemoFragment();
-        fragment.setArguments(args);
-        return fragment;
+    public static DemoFragment newInstance(int type) {
+        Fragment fragment1 = map.get(type);
+        if (fragment1 == null) {
+            Bundle args = new Bundle();
+            args.putInt("type", type);
+            fragment1 = new DemoFragment();
+            fragment1.setArguments(args);
+            map.put(type, fragment1);
+        }
+        return (DemoFragment) fragment1;
     }
 
     @Nullable
@@ -54,45 +57,55 @@ public class DemoFragment extends Fragment {
         final int type = arguments.getInt("type");
         WebView webView = view.findViewById(R.id.webView);
         webView.getSettings().setJavaScriptEnabled(true);
-        switch (type%7) {
-            case 0:
+//        switch (type%7) {
+//            case 0:
             webView.loadUrl("http://mayixiaodai.6699xt.com/register/html/2/index.html?channel=g3D6ZV/wC/ltxQ");
-            break;
-            case 1:
-                webView.loadUrl("https://www.baidu.com/");
-                break;
-            case 2:
-                webView.loadUrl("https://www.baidu.com/");
-                break;
-            case 3:
-                webView.loadUrl("https://www.baidu.com/");
-                break;
-            case 4:
-                webView.loadUrl("https://www.weibo.com/");
-                break;
-            case 5:
-                webView.loadUrl("https://www.wangyi.com/");
-                break;
-            case 6:
-                webView.loadUrl("https://www.alibaba.com/");
-                break;
-             default:
-                 webView.loadUrl("https://docs.nativebase.io/Components.html#title-header-headref");
-        }
+//            break;
+//            case 1:
+//                webView.loadUrl("http://mayixiaodai.6699xt.com/register/html/2/index.html?channel=g3D6ZV/wC/ltxQ");
+//                break;
+//            case 2:
+//                webView.loadUrl("http://mayixiaodai.6699xt.com/register/html/2/index.html?channel=g3D6ZV/wC/ltxQ");
+//                break;
+//            case 3:
+//                webView.loadUrl("https://www.baidu.com/");
+//                break;
+//            case 4:
+//                webView.loadUrl("https://www.weibo.com/");
+//                break;
+//            case 5:
+//                webView.loadUrl("https://www.wangyi.com/");
+//                break;
+//            case 6:
+//                webView.loadUrl("https://www.alibaba.com/");
+//                break;
+//             default:
+//                 webView.loadUrl("https://docs.nativebase.io/Components.html#title-header-headref");
+//        }
         refreshLayout = view.findViewById(R.id.smartRefreshLayout);
         refreshLayout.setEnableOverScrollBounce(false);
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh(@NonNull final RefreshLayout refreshLayout1) {
-                ((MainActivity) getActivity()).changFragment(type + 1);
-                refreshLayout.finishLoadMore(1000);
+                refreshLayout.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        refreshLayout.finishRefresh();
+                        ((MainActivity) getActivity()).changFragment(type + 1);
+                    }
+                }, 300);
             }
         });
         refreshLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
             @Override
-            public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
-                ((MainActivity) getActivity()).returnFragment(type - 1);
-                refreshLayout.finishLoadMore(1000);
+            public void onLoadMore(@NonNull RefreshLayout refreshLayout1) {
+                refreshLayout.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        refreshLayout.finishLoadMore();
+                        ((MainActivity) getActivity()).returnFragment(type - 1);
+                    }
+                }, 300);
             }
         });
     }
